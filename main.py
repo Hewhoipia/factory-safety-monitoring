@@ -61,8 +61,7 @@ def main():
                     hw = "WARNING"
                     
                     # check hat when join the warning zone
-                    # detect only in the 'Person' frame
-                    dets1_in_zone = np.array(detector.detect_in_zone(frame, (x1, y1, x2, y2)))
+                    dets1_in_zone = np.array(detector.detect_in_zone(frame, (x1, y1, x2, y2))) # detect only in the 'Person' frame
                     if dets1_in_zone.size > 0:
                         coords = dets1_in_zone[:, :-1]
                         cls = dets1_in_zone[:, -1]

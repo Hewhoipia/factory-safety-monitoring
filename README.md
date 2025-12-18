@@ -38,3 +38,58 @@ python ./main.py
 3. **[zones.py](src/zones.py)** với class ZoneManager sử dụng để vẽ và kiểm tra vật thể xâm nhập vùng nguy hiểm
 
 ### main.py
+Diagram below or view [this](results/explain.png)
+```mermaid
+flowchart TD
+    Start([Start Program]) --> Init[Initialize: Detector, Loggers, Hardware, Video Sources]
+    Init --> DefineZones[Define Safety Zones for Cam 1 & 2]
+    DefineZones --> While[While True Loop]
+    
+    subgraph Main_Loop [While True Loop]
+        Read[Read Frames from 3 Cameras] --> Frame_Check{No signal?}
+        Frame_Check -- Yes --> End
+        Frame_Check -- No --> Resize[Resize/Crop Frames]
+        
+        %% Branching for 3 Cameras
+        Resize --> Cam1_Flow
+        Resize --> Cam2_Flow
+        Resize --> Cam3_Flow
+        
+        %% CAM 1 LOGIC
+        subgraph Cam1_Flow [Cam 1: Intrusion & PPE]
+            C1_Draw[Draw zone] --> C1_Det[Detect 'Persons' in frame]
+            C1_Det --> C1_Check{'Person' in zone?}
+            C1_Check -- No --> C1_Safe[Mark Safe]
+            C1_Check -- Yes --> C1_Intruder[Warning: Intrusion]
+            C1_Intruder --> C1_Crop[Crop 'Person' frame]
+            C1_Crop --> C1_Det2[Detect 'NO-Hardhat' in Crop]
+            C1_Det2 --> C1_HatCheck{No Hat?}
+            C1_HatCheck -- Yes --> C1_Crit[<b>ALARM: CRITICAL</b><br>Intrusion + No Hat]
+            C1_HatCheck -- No --> C1_Warn[<b>ALARM: WARNING</b><br>Intrusion Only]
+        end
+
+        %% CAM 2 LOGIC
+        subgraph Cam2_Flow [Cam 2: Intrusion Only]
+            C2_Draw[Draw Zone] --> C2_Det[Detect 'Persons']
+            C2_Det --> C2_Check{Person in Zone?}
+            C2_Check -- No --> C2_Safe[Mark Safe]
+            C2_Check -- Yes --> C2_Warn[<b>ALARM: WARNING</b><br>Intrusion]
+        end
+
+        %% CAM 3 LOGIC
+        subgraph Cam3_Flow [Cam 3: PPE Only]
+            C3_Det[Detect class 'NO-Hardhat']
+            C3_Det --> C3_Check{No hat?}
+            C3_Check -- Hardhat --> C3_Safe[Mark Safe]
+            C3_Check -- No-Hardhat --> C3_Warn[<b>ALARM: WARNING</b><br>No PPE]
+        end
+
+        %% Logging & Display
+        C1_Warn & C1_Crit & C2_Warn & C3_Warn --> Log[Log to CSV & Trigger Hardware]
+        C1_Safe & C1_Warn & C1_Crit & C2_Safe & C2_Warn & C3_Safe & C3_Warn --> Display[cv2.imshow]
+    end
+    
+    Display --> Q_Check{Key 'q' pressed?}
+    Q_Check -- No --> Read
+    Q_Check -- Yes --> End([End Program])
+```
