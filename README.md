@@ -38,7 +38,7 @@ python ./main.py
 3. **[zones.py](src/zones.py)** với class ZoneManager sử dụng để vẽ và kiểm tra vật thể xâm nhập vùng nguy hiểm
 
 ### main.py
-Diagram below or view [this](results/explain.png)
+Xem diagram bên dưới hoặc [hình ảnh](results/explain.png)
 ```mermaid
 flowchart TD
     Start([Start Program]) --> Init[Initialize: Detector, Loggers, Hardware, Video Sources]
