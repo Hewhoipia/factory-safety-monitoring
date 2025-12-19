@@ -144,11 +144,29 @@ def main():
         # CAM 3: PPE Only
         frame3 = frames[2]
         cam3(frame3)
-
+        
         # Display
-        cv2.imshow("CAM 1: Intrusion & PPE", frame1)
-        cv2.imshow("CAM 2: Intrusion", frame2)
-        cv2.imshow("CAM 3: PPE Check", frame3)
+        # CAM 1
+        cv2.putText(frame1, "CAM 1: Intrusion & PPE", (30, 50), 
+                    cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+        # CAM 2
+        cv2.putText(frame2, "CAM 2: Intrusion Only", (30, 50), 
+                    cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+        # CAM 3
+        cv2.putText(frame3, "CAM 3: PPE Check", (30, 50), 
+                    cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+        # Create a black blank image
+        h, w, _ = frame1.shape
+        blank_screen = np.zeros((h, w, 3), dtype=np.uint8)
+        # Create top row and bottom row
+        top_row = np.hstack((frame1, frame2))    # Cam 1 | Cam 2
+        bottom_row = np.hstack((frame3, blank_screen)) # Cam 3 | Blank
+        # Stack
+        grid = np.vstack((top_row, bottom_row))
+        # Resize to fit screen
+        #grid = cv2.resize(grid, None, fx=0.8, fy=0.8)
+
+        cv2.imshow("All CAM", grid)
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
